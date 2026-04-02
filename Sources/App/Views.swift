@@ -2,50 +2,122 @@ import Hummingbird
 import Foundation
 
 struct Views {
-    static func renderIndex(items: [TaskItem]) -> HTML {
-        let rows = items.map { item in
-            """
-            <article style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <span style="text-decoration: \(item.isCompleted ? "line-through" : "none")">
-                    \(item.isCompleted ? "✅" : "⭕️") \(item.title)
-                </span>
-                <form action="/toggle/\(item.id ?? 0)" method="post" style="margin: 0;">
-                    <button type="submit" class="outline secondary" style="padding: 4px 8px; font-size: 0.8rem;">
-                        \(item.isCompleted ? "Undo" : "Complete")
-                    </button>
-                </form>
-            </article>
-            """
-        }.joined()
-
-        return HTML(content: """
+    // --- PAGE D'ACCUEIL ---
+    static func renderIndex(items: [VisionItem], categories: [CategoryItem]) -> HTML {
+        let content = """
         <!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-            <title>Swift Task App</title>
+            <title>VisionBoard</title>
+            <style>
+                /* Force la grille à avoir maximum 4 colonnes sur grand écran */
+                .grid-visions {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 1rem;
+                }
+            </style>
         </head>
-        <body class="container" style="padding-top: 2rem; max-width: 600px;">
-            <header>
-                <h1>Swift Task List</h1>
-                <p>A lightweight TO-DO List app built with Swift, Hummingbird, and SQLite.</p>
+            <body class="container">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1 style="margin: 0;">Mes Visions</h1>
+                <a href="/add" role="button" class="contrast"> ＋ Nouvelle Vision</a>
             </header>
-            
-            <main>
-                <form action="/add" method="post" style="display: flex; gap: 10px;">
-                    <input type="text" name="title" placeholder="New task..." required style="flex-grow: 1;">
-                    <button type="submit">Add</button>
-                </form>
-                
-                <section>
-                    \(items.isEmpty ? "<p>No tasks yet! Add one above.</p>" : rows)
-                </section>
-            </main>
-        </body>
+
+            <div class="grid-visions">
+                \(items.map { renderCard(item: $0, categories: categories) }.joined())
+            </div>
+            </body>
         </html>
-        """)
+        """
+        return HTML(content: content)
+    }
+
+    // --- COMPOSANT CARTE (L'unité de base) ---
+    private static func renderCard(item: VisionItem, categories: [CategoryItem]) -> String {
+        let statusEmoji = item.isCompleted ? "✅" : "⭕️"
+        let category = categories.first(where: { $0.id == item.categoryId })
+        let categoryName = category?.name ?? "Général"
+        return """
+        <article style="display: flex; flex-direction: column; justify-content: space-between;">
+            <header style="padding: 0.5rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <h5 style="margin: 0;">\(item.title)</h5>
+                    <span>\(statusEmoji)</span>
+                    <mark style="font-size: 0.7rem;"> \(categoryName)</mark>
+                </div>
+            </header>
+
+            \(item.imgUrl.isEmpty ? "" : "<img src='\(item.imgUrl)' style='width: 100%; height: 150px; object-fit: cover; border-radius: 4px;'>")
+
+            <div style="padding: 1rem 0;">
+                <p style="font-size: 0.9rem; color: var(--pico-muted-color);">\(item.description)</p>
+                <small>Budget: <strong>\(item.budget)€</strong></small>
+            </div>
+
+            <footer style="margin-top: auto; padding: 0.5rem 1rem;">
+                <form action="/toggle/\(item.id ?? 0)" method="post" style="margin: 0;">
+                    <button type="submit" class="outline secondary p-2" style="font-size: 0.7rem;">
+                        \(item.isCompleted ? "Réouvrir" : "Compléter")
+                    </button>
+                </form>
+            </footer>
+        </article>
+        """
+    }
+
+    // --- PAGE DU FORMULAIRE ---
+    static func renderAddForm(categories: [CategoryItem]) -> HTML {
+        let content = """
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+            <title>VisionBoard</title>
+        </head>
+            <body class="container">
+                <article>
+                    <header>
+                        <a href="/" style="float: right;">Fermer ✕</a>
+                        <h3>Nouvelle Vision</h3>
+                    </header>
+                    <form action="/add" method="post">
+                        <label>Titre
+                            <input type="text" name="title" placeholder="Mon prochain rêve..." required>
+                        </label>
+                        
+                        <div class="grid">
+                            <label>Catégorie
+                                <select name="categoryId">
+                                    <option value="">Général</option>
+                                    \(categories.map { "<option value='\($0.id ?? 0)'>\($0.name)</option>" }.joined())
+                                </select>
+                            </label>
+                            <label>Budget (€)
+                                <input type="number" name="budget" step="0.01" value="0">
+                            </label>
+                        </div>
+
+                        <label>Image (URL)
+                            <input type="url" name="imgUrl" placeholder="https://...">
+                        </label>
+
+                        <label>Description
+                            <textarea name="description" rows="3"></textarea>
+                        </label>
+
+                        <button type="submit">Enregistrer dans ma liste</button>
+                    </form>
+                </article>
+            </body>
+        </html>
+        """
+        return HTML(content: content)
     }
 }
 
