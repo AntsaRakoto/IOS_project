@@ -82,8 +82,6 @@ router.post("/add") { request, _ -> Response in
 
 // Route pour voir les détails
 router.get("/vision/:id") { request, context -> HTML in
-    //let params = request.uri.queryParameters
-    //let id = params.get("id", as: Int64.self) ?? 0
     guard let idString = context.parameters.get("id"),
           let id = Int64(idString) else {
         return HTML(content: "<h1>ID invalide</h1>")
@@ -97,8 +95,6 @@ router.get("/vision/:id") { request, context -> HTML in
 
 // Route pour supprimer (POST)
 router.post("/delete/:id") { request, context -> Response in
-    //let params = request.uri.queryParameters
-    //let id = params.get("id", as: Int64.self) ?? 0
     guard let idString = context.parameters.get("id"),
           let id = Int64(idString) else {
         return Response(status: .badRequest)
@@ -107,7 +103,7 @@ router.post("/delete/:id") { request, context -> Response in
     return Response(status: .seeOther, headers: [.location: "/"])
 }
 
-// API: Toggle Task
+// Changer la statut 
 router.post("/toggle/:id") { _, context -> Response in
     guard let idStr = context.parameters.get("id"), let targetId = Int64(idStr) else {
         return Response(status: .badRequest)

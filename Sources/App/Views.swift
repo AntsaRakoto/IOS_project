@@ -203,6 +203,7 @@ struct Views {
         return HTML(content: content)
     }
 
+    // PAGE DE MODIFICATION
     static func renderEdit(item: VisionItem, categories: [CategoryItem]) -> HTML {
         let content = """
         <!DOCTYPE html>

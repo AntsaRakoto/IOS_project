@@ -103,12 +103,9 @@ struct Database {
 
     // Récupère les visions filtrées selon les critères de recherche, catégorie et statut
     static func fetchFilteredVisions(db: Connection, search: String?, catId: Int64?, isDone: Bool?) throws -> [VisionItem] {
-        // On prépare la requête de base (SELECT * FROM visions)
         var query = visions 
         
-        // On ajoute les clauses WHERE conditionnellement
         if let searchText = search, !searchText.isEmpty {
-            // SQL: WHERE title LIKE '%texte%' OR description LIKE '%texte%'
             query = query.filter(title.lowercaseString.like("%\(searchText.lowercased())%") || 
                                 description.lowercaseString.like("%\(searchText.lowercased())%"))
         }
@@ -121,7 +118,6 @@ struct Database {
             query = query.filter(isCompleted == completed)
         }
 
-        // On exécute et on transforme en objets Swift
         return try db.prepare(query).map { row in
             VisionItem(
                 id: row[id],
@@ -136,7 +132,7 @@ struct Database {
         }
     }
 
-    // Récupérer UNE seule vision par son ID
+    // Récupérer 1 seule vision par son ID
     static func fetchVisionById(db: Connection, idvis: Int64) throws -> VisionItem? {
         let query = visions.filter(id == idvis)
         if let row = try db.pluck(query) {
