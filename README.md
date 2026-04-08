@@ -1,33 +1,54 @@
-# Swift App Template
+# Nom Swift App : VisionBoard Manager
 
-A starter template for iOS development students to build and run a Swift-backed web app — entirely in **GitHub Codespaces**, no Xcode or macOS required.
+VisionBoard Manager une application web CRUD (Créer, Lire, Mettre à jour, Supprimer) entièrement fonctionnelle et personnalisée. L'application est développée intégralement en Swift, en utilisant le framework web Hummingbird 2 et SQLite pour la persistance des données, et s'exécute dans l'environnement GitHub Codespaces. 
 
-The included demo is a simple **Task List** app: a web server written in Swift that persists data with SQLite and renders an interactive UI in the browser.
+Le projet aborde la gestion des requêtes HTTP de base, la modélisation des données et la création d'interfaces utilisateur web.
+
+---
+## 1. Desccription 
+VisionBoard Manager est une application web permettant de créer, visualiser et gérer des visions (objectifs, rêves ou inspirations).
+
+L’utilisateur peut ajouter des éléments avec son titre, une image URL, sa description, sa catégorie, son budget et son statut, sa date de création sera automatiquement enregistré. L'utilisateur peut les modifier ou les supprimer afin de construire son propre tableau de visualisation. 
+
+Il peut également rechercher un élément par son titre ou sa description et filtrer les éléments par catégorie et statut.
 
 ---
 
-## 1. Using This Template
+## 3. Fonctionnement
+L’utilisateur accède à une interface web
 
-1. Click the **"Use this template"** button at the top of this repository.
-2. Give your new repository a name and click **"Create repository"**.
+Il peut :
+- Ajouter une vision (titre, description, image)
+- Voir toutes les visions
+- Rechercher une vision
+- Filtrer par catégorie et statut 
+- Voir les détails de chaque vision
+- Modifier une vision existante
+- Supprimer une vision
+- Mettre à jour le statut d'une vision si elle est complétée ou pas encore
 
-> Do **not** clone this repo directly — always start from your own copy created via the template.
-
----
-
-## 2. Opening in GitHub Codespaces
-
-1. In **your new repository**, click the green **"Code"** button.
-2. Select the **"Codespaces"** tab and click **"Create codespace on main"**.
-3. Wait for the container to build — this pulls the Swift 6.2 Docker image and runs `swift package resolve` automatically. This takes a few minutes the first time.
-
-Once the container is ready, VS Code opens in the browser with Swift fully configured.
+Les données sont stockées dans une base de donnée SQLite
 
 ---
 
-## 3. Build & Run
+## 4. Routes exposées
 
-Open the integrated terminal and run:
+| Méthode | Route                 | Description                                       |
+| ------- | --------------------- | ------------------------------------------------- |
+| GET     | `/`                   | Affiche la page d’accueil avec toutes les visions |
+| GET     | `/add`                | Affiche le formulaire de création                 |
+| POST    | `/add`                | Crée une nouvelle vision                          |
+| GET     | `/vision/:id`         | Affiche le détail d'une vision spécifique         |
+| POST    | `/delete/:id`         | Supprime une vision          |
+| POST    | `/toggle/:id`         | Met à jour le statut d'une vision                 |
+| GET     | `/edit/:id`           | Affiche le formulaire de modification             |
+| POST    | `/edit/:id`           | Modifie une vision           |
+
+---
+## 5. Exécution du projet
+
+1. Opening in GitHub Codespaces : Click the green **"Code"** button in this repository, select the **"Codespaces"** tab and click **"VisionBoard Manager"**.
+2. Build & Run : Open the integrated terminal and run:
 
 ```bash
 ./build.sh
@@ -42,8 +63,9 @@ This resolves dependencies and compiles the project. When it finishes, start the
 Codespaces will detect that port **8080** is now in use and show a pop-up — click **"Open in Browser"** (or find it under the **Ports** tab). You should see the Task List app running live.
 
 > To stop the server press `Ctrl + C` in the terminal.
-
 ---
+
+
 
 ## 4. Project Structure
 
@@ -85,7 +107,7 @@ Browser  →  HTTP Request
 
 ---
 
-## 6. Your Assignment
+## 6. Assignment
 
 Your job is to extend this template into your own app. Here are the four files you will work in and what to change:
 
@@ -110,15 +132,7 @@ Modify `renderIndex(items:)` to display your data the way you want. You can add 
 
 ### `main.swift` — Add routes
 Register new routes to handle new pages or actions. Follow the existing pattern:
-```swift
-router.get("/my-page") { _, _ -> HTML in
-    // fetch data, return a View
-}
 
-router.post("/my-action") { request, context -> Response in
-    // handle form submission
-}
-```
 
 ---
 
@@ -132,28 +146,3 @@ router.post("/my-action") { request, context -> Response in
 | Protocol conformance | `Views.swift` — `HTML: ResponseGenerator` |
 | `throws` / `try` | `Database.swift` — all database calls |
 | Extensions | `Database.swift` — `Connection: @unchecked Sendable` |
-
----
-
-## 8. Troubleshooting
-
-**Port 8080 is already in use**
-Another process is using the port. In the terminal run:
-```bash
-lsof -i :8080
-kill <PID>
-```
-Then start the server again with `./run.sh`.
-
-**`error: 'App' product not found` or build errors on first open**
-The package dependencies may not have resolved yet. Run:
-```bash
-swift package resolve
-./build.sh
-```
-
-**Codespace is slow to start**
-The first build after creating a Codespace downloads the Swift Docker image (~1 GB). Subsequent starts are much faster because the image is cached.
-
-**Changes not showing in the browser**
-The server must be restarted to pick up code changes. Press `Ctrl + C`, run `./build.sh`, then `./run.sh` again.
